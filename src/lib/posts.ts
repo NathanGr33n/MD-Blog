@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import { z } from "zod";
+import { slugifyTag } from "./tags";
 
 /** Absolute path to the directory that holds Markdown post files. */
 const POSTS_DIRECTORY = path.join(process.cwd(), "content", "posts");
@@ -69,4 +70,38 @@ export function getAllPosts(): PostMeta[] {
       draft: post.draft,
     }))
     .sort((a, b) => b.date.getTime() - a.date.getTime());
+}
+
+export type TagSummary = { tag: string; slug: string; count: number };
+
+/**
+ * Aggregate tags across all published posts.
+ * Returns each tag's display name, URL slug, and post count, sorted by count
+ * (descending) then name.
+ */
+export function getAllTags(): TagSummary[] {
+  const bySlug = new Map<string, { tag: string; count: number }>();
+
+  for (const post of getAllPosts()) {
+    for (const tag of post.tags) {
+      const slug = slugifyTag(tag);
+      const existing = bySlug.get(slug);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        bySlug.set(slug, { tag, count: 1 });
+      }
+    }
+  }
+
+  return [...bySlug.entries()]
+    .map(([slug, { tag, count }]) => ({ tag, slug, count }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+}
+
+/** Return published posts that have the given tag slug, newest first. */
+export function getPostsByTag(tagSlug: string): PostMeta[] {
+  return getAllPosts().filter((post) =>
+    post.tags.some((tag) => slugifyTag(tag) === tagSlug),
+  );
 }

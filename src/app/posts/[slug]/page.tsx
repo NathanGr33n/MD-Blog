@@ -5,6 +5,7 @@ import { markdownToHtml } from "@/lib/markdown";
 import { extractToc } from "@/lib/toc";
 import { formatDate } from "@/lib/format";
 import { TableOfContents } from "@/components/TableOfContents";
+import { TagList } from "@/components/TagList";
 
 /** Prerender a page for every published post at build time. */
 export function generateStaticParams() {
@@ -50,6 +51,7 @@ export default async function PostPage({
             {formatDate(post.date)}
           </time>
         </p>
+        <TagList tags={post.tags} className="mt-3" />
       </header>
 
       <TableOfContents items={toc} />

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getAllPosts } from "@/lib/posts";
 import { formatDate } from "@/lib/format";
+import { TagList } from "@/components/TagList";
 
 export default function Home() {
   const posts = getAllPosts();
@@ -39,18 +40,7 @@ export default function Home() {
                     {post.description}
                   </p>
                 )}
-                {post.tags.length > 0 && (
-                  <ul className="mt-3 flex flex-wrap gap-2">
-                    {post.tags.map((tag) => (
-                      <li
-                        key={tag}
-                        className="rounded bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
-                      >
-                        {tag}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                <TagList tags={post.tags} className="mt-3" />
               </article>
             </li>
           ))}
