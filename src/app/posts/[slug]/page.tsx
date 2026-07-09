@@ -2,7 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getAllPosts, getPostBySlug } from "@/lib/posts";
 import { markdownToHtml } from "@/lib/markdown";
+import { extractToc } from "@/lib/toc";
 import { formatDate } from "@/lib/format";
+import { TableOfContents } from "@/components/TableOfContents";
 
 /** Prerender a page for every published post at build time. */
 export function generateStaticParams() {
@@ -33,6 +35,7 @@ export default async function PostPage({
   const { slug } = await params;
   const post = getPostBySlug(slug);
   const html = await markdownToHtml(post.content);
+  const toc = extractToc(post.content);
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">
@@ -49,8 +52,10 @@ export default async function PostPage({
         </p>
       </header>
 
+      <TableOfContents items={toc} />
+
       <div
-        className="post-content"
+        className="prose max-w-none prose-zinc dark:prose-invert post-content"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </article>
