@@ -37,12 +37,20 @@ export default function RootLayout({
             <Link href="/" className="font-semibold">
               MD-Blog
             </Link>
-            <Link
-              href="/tags"
-              className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-            >
-              Tags
-            </Link>
+            <div className="flex items-center gap-4 text-sm">
+              <Link
+                href="/tags"
+                className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+              >
+                Tags
+              </Link>
+              <Link
+                href="/search"
+                className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+              >
+                Search
+              </Link>
+            </div>
           </nav>
         </header>
         <main className="flex-1">{children}</main>
