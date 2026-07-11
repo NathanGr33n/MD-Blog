@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import { z } from "zod";
 import { slugifyTag } from "./tags";
 import { markdownToPlainText } from "./plaintext";
+import { readingTime } from "./reading-time";
 import type { SearchDocument } from "./search";
 
 /** Absolute path to the directory that holds Markdown post files. */
@@ -19,7 +20,10 @@ const FrontmatterSchema = z.object({
   draft: z.boolean().default(false),
 });
 
-export type PostMeta = z.infer<typeof FrontmatterSchema> & { slug: string };
+export type PostMeta = z.infer<typeof FrontmatterSchema> & {
+  slug: string;
+  readingMinutes: number;
+};
 export type Post = PostMeta & { content: string };
 
 function getPostFilePath(slug: string): string {
@@ -52,7 +56,12 @@ export function getPostBySlug(slug: string): Post {
     );
   }
 
-  return { slug, content, ...parsed.data };
+  return {
+    slug,
+    content,
+    readingMinutes: readingTime(content),
+    ...parsed.data,
+  };
 }
 
 /**
@@ -70,6 +79,7 @@ export function getAllPosts(): PostMeta[] {
       date: post.date,
       tags: post.tags,
       draft: post.draft,
+      readingMinutes: post.readingMinutes,
     }))
     .sort((a, b) => b.date.getTime() - a.date.getTime());
 }
