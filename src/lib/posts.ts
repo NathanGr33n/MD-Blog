@@ -3,6 +3,8 @@ import path from "node:path";
 import matter from "gray-matter";
 import { z } from "zod";
 import { slugifyTag } from "./tags";
+import { markdownToPlainText } from "./plaintext";
+import type { SearchDocument } from "./search";
 
 /** Absolute path to the directory that holds Markdown post files. */
 const POSTS_DIRECTORY = path.join(process.cwd(), "content", "posts");
@@ -104,4 +106,21 @@ export function getPostsByTag(tagSlug: string): PostMeta[] {
   return getAllPosts().filter((post) =>
     post.tags.some((tag) => slugifyTag(tag) === tagSlug),
   );
+}
+
+/**
+ * Build the search index: one document per published post containing its
+ * metadata and plain-text body. Consumed by the client-side search UI.
+ */
+export function getSearchDocuments(): SearchDocument[] {
+  return getPostSlugs()
+    .map((slug) => getPostBySlug(slug))
+    .filter((post) => !post.draft)
+    .map((post) => ({
+      slug: post.slug,
+      title: post.title,
+      description: post.description,
+      tags: post.tags,
+      text: markdownToPlainText(post.content),
+    }));
 }
