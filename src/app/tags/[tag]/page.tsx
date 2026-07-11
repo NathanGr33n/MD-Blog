@@ -58,6 +58,8 @@ export default async function TagPage({
               <time dateTime={post.date.toISOString()}>
                 {formatDate(post.date)}
               </time>
+              <span aria-hidden="true"> · </span>
+              <span>{post.readingMinutes} min read</span>
             </p>
             {post.description && (
               <p className="mt-2 text-zinc-700 dark:text-zinc-300">
