@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
+import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,11 +15,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: "MD-Blog",
-    template: "%s · MD-Blog",
+    default: siteConfig.name,
+    template: `%s · ${siteConfig.name}`,
   },
-  description: "A markdown blog platform built with Next.js.",
+  description: siteConfig.description,
+  alternates: {
+    canonical: "/",
+    types: {
+      "application/rss+xml": "/feed.xml",
+    },
+  },
+  openGraph: {
+    type: "website",
+    siteName: siteConfig.name,
+    title: siteConfig.name,
+    description: siteConfig.description,
+    url: "/",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary",
+    title: siteConfig.name,
+    description: siteConfig.description,
+  },
 };
 
 export default function RootLayout({
@@ -32,6 +53,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
         <header className="border-b border-zinc-200 dark:border-zinc-800">
           <nav className="mx-auto flex max-w-3xl items-center justify-between px-6 py-4">
             <Link href="/" className="font-semibold">
@@ -53,7 +77,9 @@ export default function RootLayout({
             </div>
           </nav>
         </header>
-        <main className="flex-1">{children}</main>
+        <main id="main-content" className="flex-1">
+          {children}
+        </main>
         <footer className="border-t border-zinc-200 dark:border-zinc-800">
           <div className="mx-auto max-w-3xl px-6 py-6 text-sm text-zinc-500">
             &copy; {new Date().getFullYear()} MD-Blog

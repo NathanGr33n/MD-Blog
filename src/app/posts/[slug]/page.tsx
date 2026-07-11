@@ -22,9 +22,24 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const post = getPostBySlug(slug);
+  const url = `/posts/${slug}/`;
   return {
     title: post.title,
     description: post.description,
+    alternates: { canonical: url },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.description,
+      url,
+      publishedTime: post.date.toISOString(),
+      tags: post.tags,
+    },
+    twitter: {
+      card: "summary",
+      title: post.title,
+      description: post.description,
+    },
   };
 }
 
@@ -50,6 +65,8 @@ export default async function PostPage({
           <time dateTime={post.date.toISOString()}>
             {formatDate(post.date)}
           </time>
+          <span aria-hidden="true"> · </span>
+          <span>{post.readingMinutes} min read</span>
         </p>
         <TagList tags={post.tags} className="mt-3" />
       </header>
