@@ -34,6 +34,7 @@ npm run build    # outputs a static site to ./out
 `npm run build` produces a static export in `out/` that can be hosted anywhere.
 - **Vercel:** import the repo; no configuration required.
 - **Netlify:** build command `npm run build`, publish directory `out`.
-- **GitHub Pages:** serve the `out/` directory. Project sites (served from `/<repo>/`) also require setting `basePath`/`assetPrefix` in `next.config.ts` and adding a `.nojekyll` file so the `_next/` assets are served.
+- **GitHub Pages (automated):** `.github/workflows/deploy-pages.yml` builds with `NEXT_PUBLIC_BASE_PATH=/MD-Blog` and publishes to `https://nathangr33n.github.io/MD-Blog/` on every push to `Master`.
 - **Any static host / CDN (S3, Nginx, ...):** upload the contents of `out/`.
-Continuous integration (`.github/workflows/ci.yml`) runs lint and build on every push and pull request to `Master`.
+For subpath hosting, set `NEXT_PUBLIC_BASE_PATH` (URL prefix) and `NEXT_PUBLIC_SITE_URL` (absolute site URL) at build time.
+Continuous integration (`.github/workflows/ci.yml`) runs lint and build on every push and pull request to `Master`; `.github/workflows/deploy-pages.yml` deploys to GitHub Pages.
