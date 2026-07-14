@@ -11,7 +11,11 @@ export const siteConfig = {
   url: rawUrl.replace(/\/+$/, ""),
 };
 
-/** Build an absolute URL for a site-relative path. */
+/**
+ * Build an absolute URL for a site-relative path, preserving any base path in
+ * `siteConfig.url` (e.g. the `/MD-Blog` subpath for GitHub Pages project sites).
+ */
 export function absoluteUrl(path = "/"): string {
-  return new URL(path, `${siteConfig.url}/`).toString();
+  const suffix = path.startsWith("/") ? path : `/${path}`;
+  return `${siteConfig.url}${suffix}`;
 }
