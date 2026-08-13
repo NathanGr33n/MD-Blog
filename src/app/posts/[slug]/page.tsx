@@ -1,11 +1,18 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getAllPosts, getPostBySlug } from "@/lib/posts";
+import {
+  getAdjacentPosts,
+  getAllPosts,
+  getPostBySlug,
+  getRelatedPosts,
+} from "@/lib/posts";
 import { markdownToHtml } from "@/lib/markdown";
 import { extractToc } from "@/lib/toc";
 import { formatDate } from "@/lib/format";
 import { TableOfContents } from "@/components/TableOfContents";
 import { TagList } from "@/components/TagList";
+import { RelatedPosts } from "@/components/RelatedPosts";
+import { PostNav } from "@/components/PostNav";
 
 /** Prerender a page for every published post at build time. */
 export function generateStaticParams() {
@@ -52,6 +59,8 @@ export default async function PostPage({
   const post = getPostBySlug(slug);
   const html = await markdownToHtml(post.content);
   const toc = extractToc(post.content);
+  const { previous, next } = getAdjacentPosts(slug);
+  const related = getRelatedPosts(slug);
 
   return (
     <article className="mx-auto max-w-3xl px-6 py-12">
@@ -77,6 +86,9 @@ export default async function PostPage({
         className="prose max-w-none prose-zinc dark:prose-invert post-content"
         dangerouslySetInnerHTML={{ __html: html }}
       />
+
+      <RelatedPosts posts={related} />
+      <PostNav previous={previous} next={next} />
     </article>
   );
 }
