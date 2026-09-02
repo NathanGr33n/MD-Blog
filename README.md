@@ -67,11 +67,14 @@ src/lib/             Content loading, Markdown pipeline, search, site config
 - `npm run dev` — start the development server
 - `npm run build` — build the static site into `out/`
 - `npm run lint` — run ESLint
+- `npm run test` — run the Vitest test suite once
+- `npm run test:watch` — run the Vitest test suite in watch mode
 
 ## Build & preview
 
 ```bash
 npm run lint
+npm run test
 npm run build              # outputs a static site to ./out
 npx serve out              # optional: preview the static build locally
 ```
@@ -89,4 +92,4 @@ For subpath hosting, set `NEXT_PUBLIC_BASE_PATH` (URL prefix) and `NEXT_PUBLIC_S
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs lint and build on every push and pull request to `Master`; `.github/workflows/deploy-pages.yml` deploys to GitHub Pages.
+`.github/workflows/ci.yml` runs lint, tests, and build on every push and pull request to `Master`; `.github/workflows/deploy-pages.yml` deploys to GitHub Pages.
