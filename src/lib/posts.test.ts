@@ -137,6 +137,94 @@ describe("getPostsByTag", () => {
   });
 });
 
+describe("getAdjacentPosts", () => {
+  it("returns the older post as previous and newer post as next", async () => {
+    setPostFiles({
+      "old.md": post("title: Old\ndate: 2025-01-01"),
+      "mid.md": post("title: Mid\ndate: 2025-06-01"),
+      "new.md": post("title: New\ndate: 2025-12-01"),
+    });
+    const { getAdjacentPosts } = await import("./posts");
+    const { previous, next } = getAdjacentPosts("mid");
+    expect(previous?.slug).toBe("old");
+    expect(next?.slug).toBe("new");
+  });
+
+  it("returns null at the ends of the timeline", async () => {
+    setPostFiles({
+      "old.md": post("title: Old\ndate: 2025-01-01"),
+      "new.md": post("title: New\ndate: 2025-12-01"),
+    });
+    const { getAdjacentPosts } = await import("./posts");
+    expect(getAdjacentPosts("new")).toEqual({
+      previous: expect.objectContaining({ slug: "old" }),
+      next: null,
+    });
+    expect(getAdjacentPosts("old")).toEqual({
+      previous: null,
+      next: expect.objectContaining({ slug: "new" }),
+    });
+  });
+
+  it("returns both null for an unknown slug", async () => {
+    setPostFiles({
+      "only.md": post("title: Only\ndate: 2025-01-01"),
+    });
+    const { getAdjacentPosts } = await import("./posts");
+    expect(getAdjacentPosts("missing")).toEqual({
+      previous: null,
+      next: null,
+    });
+  });
+});
+
+describe("getRelatedPosts", () => {
+  it("ranks posts by number of shared tags, then recency", async () => {
+    setPostFiles({
+      "current.md": post("title: Current\ndate: 2025-06-01\ntags: [a, b, c]"),
+      "two-tags-old.md": post(
+        "title: TwoTagsOld\ndate: 2025-01-01\ntags: [a, b]",
+      ),
+      "two-tags-new.md": post(
+        "title: TwoTagsNew\ndate: 2025-05-01\ntags: [a, b]",
+      ),
+      "one-tag.md": post("title: OneTag\ndate: 2025-12-01\ntags: [a]"),
+      "no-shared-tag.md": post("title: Unrelated\ndate: 2025-01-01\ntags: [z]"),
+    });
+    const { getRelatedPosts } = await import("./posts");
+    const slugs = getRelatedPosts("current").map((p) => p.slug);
+    expect(slugs).toEqual(["two-tags-new", "two-tags-old", "one-tag"]);
+  });
+
+  it("respects the limit parameter", async () => {
+    setPostFiles({
+      "current.md": post("title: Current\ndate: 2025-06-01\ntags: [a]"),
+      "r1.md": post("title: R1\ndate: 2025-01-01\ntags: [a]"),
+      "r2.md": post("title: R2\ndate: 2025-02-01\ntags: [a]"),
+      "r3.md": post("title: R3\ndate: 2025-03-01\ntags: [a]"),
+    });
+    const { getRelatedPosts } = await import("./posts");
+    expect(getRelatedPosts("current", 2)).toHaveLength(2);
+  });
+
+  it("returns an empty array when the post has no tags", async () => {
+    setPostFiles({
+      "current.md": post("title: Current\ndate: 2025-06-01"),
+      "other.md": post("title: Other\ndate: 2025-01-01\ntags: [a]"),
+    });
+    const { getRelatedPosts } = await import("./posts");
+    expect(getRelatedPosts("current")).toEqual([]);
+  });
+
+  it("returns an empty array for an unknown slug", async () => {
+    setPostFiles({
+      "only.md": post("title: Only\ndate: 2025-01-01\ntags: [a]"),
+    });
+    const { getRelatedPosts } = await import("./posts");
+    expect(getRelatedPosts("missing")).toEqual([]);
+  });
+});
+
 describe("getSearchDocuments", () => {
   it("excludes drafts and includes plain-text body content", async () => {
     setPostFiles({
