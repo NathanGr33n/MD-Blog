@@ -118,6 +118,57 @@ export function getPostsByTag(tagSlug: string): PostMeta[] {
   );
 }
 
+export type AdjacentPosts = { previous: PostMeta | null; next: PostMeta | null };
+
+/**
+ * Return the chronologically adjacent published posts for `slug`.
+ * `previous` is the older post (published before), `next` is the newer post
+ * (published after). Either may be `null` at the ends of the timeline, or if
+ * `slug` does not match a published post.
+ */
+export function getAdjacentPosts(slug: string): AdjacentPosts {
+  const posts = getAllPosts(); // sorted newest first
+  const index = posts.findIndex((post) => post.slug === slug);
+  if (index === -1) {
+    return { previous: null, next: null };
+  }
+
+  return {
+    previous: posts[index + 1] ?? null,
+    next: posts[index - 1] ?? null,
+  };
+}
+
+/**
+ * Return up to `limit` other published posts that share at least one tag with
+ * `slug`, ordered by number of shared tags (descending) then recency.
+ * Returns an empty array if `slug` is unknown or has no tags.
+ */
+export function getRelatedPosts(slug: string, limit = 3): PostMeta[] {
+  const posts = getAllPosts();
+  const current = posts.find((post) => post.slug === slug);
+  if (!current || current.tags.length === 0) {
+    return [];
+  }
+
+  const currentTagSlugs = new Set(current.tags.map(slugifyTag));
+
+  return posts
+    .filter((post) => post.slug !== slug)
+    .map((post) => ({
+      post,
+      shared: post.tags.filter((tag) => currentTagSlugs.has(slugifyTag(tag)))
+        .length,
+    }))
+    .filter((entry) => entry.shared > 0)
+    .sort(
+      (a, b) =>
+        b.shared - a.shared || b.post.date.getTime() - a.post.date.getTime(),
+    )
+    .slice(0, limit)
+    .map((entry) => entry.post);
+}
+
 /**
  * Build the search index: one document per published post containing its
  * metadata and plain-text body. Consumed by the client-side search UI.
